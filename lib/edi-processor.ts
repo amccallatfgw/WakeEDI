@@ -157,7 +157,8 @@ export async function processInbound(rawData: string, connectionId?: number): Pr
                     const mapped = await applyMapping(tx, mappingId);
 
                     if (mapped.success && mapped.records.length > 0) {
-                        const writeResult = await writeMappedRecords(mapped.records);
+                        // Write to the partner's target app database (e.g. freightwake)
+                        const writeResult = await writeMappedRecords(mapped.records, partner.target_app || undefined);
 
                         if (writeResult.success && writeResult.created.length > 0) {
                             targetId = writeResult.created[0].id;

@@ -1,8 +1,10 @@
 // lib/sara.ts — SARA: Segment Aware Routing Architecture
 // The mapping engine that transforms parsed X12 data into Wake Tech database records.
 // Reads mapping_rules for a given profile, applies transforms, writes to target tables.
+// Supports cross-database writes — can write to FreightWake, WakeSignal, etc.
 
 import { getPool, sql } from "./mssql";
+import { getTargetPool } from "./mssql-targets";
 import type { X12Transaction, X12Segment } from "./x12-parser";
 import { getElement, findSegments, findLoop } from "./x12-parser";
 
@@ -281,13 +283,15 @@ export async function applyMapping(
 
 /**
  * Write mapped records to the target database.
- * Returns the IDs of created records.
+ * If targetApp is specified (e.g. "freightwake"), writes to that database.
+ * Otherwise writes to the WakeEDI database.
  */
 export async function writeMappedRecords(
     records: MappedRecord[],
-    targetDb?: string
+    targetApp?: string
 ): Promise<{ success: boolean; created: { table: string; id: number }[]; errors: string[] }> {
-    const db = await getPool();
+    // Get the right pool — target app database or local WakeEDI database
+    const db = targetApp ? await getTargetPool(targetApp) : await getPool();
     const created: { table: string; id: number }[] = [];
     const errors: string[] = [];
 

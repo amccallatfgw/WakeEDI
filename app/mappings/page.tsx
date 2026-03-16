@@ -46,6 +46,16 @@ export default function MappingsPage() {
     const [ruleForm, setRuleForm] = useState({ x12_segment: "", x12_element: 1, x12_loop: "", target_table: "", target_column: "", transform: "none", is_required: false });
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
+    // Schema introspection — live tables/columns from target database
+    const [schema, setSchema] = useState<{ table_name: string; columns: { column_name: string; data_type: string }[] }[]>([]);
+    const [schemaLoaded, setSchemaLoaded] = useState(false);
+
+    const loadSchema = useCallback((targetApp: string) => {
+        fetch(`/api/schema?target=${targetApp}`)
+            .then(r => r.json())
+            .then(d => { setSchema(d.tables ?? []); setSchemaLoaded(true); })
+            .catch(() => setSchemaLoaded(false));
+    }, []);
 
     const load = useCallback(() => {
         setLoading(true);
@@ -114,7 +124,7 @@ export default function MappingsPage() {
                     <div>
                         <div className="flex items-center justify-between mb-4">
                             <p className="text-sm text-ink-2">{selected.description || "No description"}</p>
-                            <BtnPrimary onClick={() => setAddRuleOpen(true)}>+ Add Rule</BtnPrimary>
+                            <BtnPrimary onClick={() => { setAddRuleOpen(true); if (!schemaLoaded && selected.target_app) loadSchema(selected.target_app); }}>+ Add Rule</BtnPrimary>
                         </div>
 
                         <div className="bg-side-bg rounded-xl border border-fw-border overflow-hidden">
@@ -217,16 +227,41 @@ export default function MappingsPage() {
                     </div>
 
                     <SectionHeader title="Target Field" />
+                    {!schemaLoaded && selected?.target_app && (
+                        <button onClick={() => loadSchema(selected.target_app)} className="text-xs text-accent hover:underline mb-2">
+                            Load {selected.target_app} schema →
+                        </button>
+                    )}
                     <div className="grid grid-cols-2 gap-3">
                         <div className="flex flex-col gap-1">
                             <label className="text-xs font-semibold text-slate-600">Table *</label>
-                            <input value={ruleForm.target_table} onChange={e => setRuleForm(f => ({ ...f, target_table: e.target.value }))}
-                                placeholder="orders, order_stops…" className="h-10 px-3 rounded-lg border border-fw-border bg-white text-sm font-mono" />
+                            {schema.length > 0 ? (
+                                <select value={ruleForm.target_table}
+                                    onChange={e => setRuleForm(f => ({ ...f, target_table: e.target.value, target_column: "" }))}
+                                    className="h-10 px-2 rounded-lg border border-fw-border bg-white text-sm font-mono">
+                                    <option value="">Select table…</option>
+                                    {schema.map(t => <option key={t.table_name} value={t.table_name}>{t.table_name}</option>)}
+                                </select>
+                            ) : (
+                                <input value={ruleForm.target_table} onChange={e => setRuleForm(f => ({ ...f, target_table: e.target.value }))}
+                                    placeholder="orders, order_stops…" className="h-10 px-3 rounded-lg border border-fw-border bg-white text-sm font-mono" />
+                            )}
                         </div>
                         <div className="flex flex-col gap-1">
                             <label className="text-xs font-semibold text-slate-600">Column *</label>
-                            <input value={ruleForm.target_column} onChange={e => setRuleForm(f => ({ ...f, target_column: e.target.value }))}
-                                placeholder="customer_ref…" className="h-10 px-3 rounded-lg border border-fw-border bg-white text-sm font-mono" />
+                            {schema.length > 0 && ruleForm.target_table ? (
+                                <select value={ruleForm.target_column}
+                                    onChange={e => setRuleForm(f => ({ ...f, target_column: e.target.value }))}
+                                    className="h-10 px-2 rounded-lg border border-fw-border bg-white text-sm font-mono">
+                                    <option value="">Select column…</option>
+                                    {schema.find(t => t.table_name === ruleForm.target_table)?.columns.map(c => (
+                                        <option key={c.column_name} value={c.column_name}>{c.column_name} ({c.data_type})</option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <input value={ruleForm.target_column} onChange={e => setRuleForm(f => ({ ...f, target_column: e.target.value }))}
+                                    placeholder="customer_ref…" className="h-10 px-3 rounded-lg border border-fw-border bg-white text-sm font-mono" />
+                            )}
                         </div>
                     </div>
 
