@@ -6,7 +6,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "hash-password": "node -e \"require('argon2').hash(process.argv[1],{type:2,memoryCost:16384,timeCost:3,parallelism:2}).then(console.log)\" "
+    "hash-password": "node -e \"require('argon2').hash(process.argv[1],{type:2,memoryCost:16384,timeCost:3,parallelism:2}).then(console.log)\" ",
+    "migrate": "node migrate.js run",
+    "migrate:status": "node migrate.js status"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
