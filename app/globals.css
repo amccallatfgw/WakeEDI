@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+/* =========================================================
+   TAILWIND v4 THEME – Wake Tech Design Tokens
+   ========================================================= */
+
+@theme {
+    --color-ink: #0f172a;
+    --color-ink-2: #334155;
+    --color-accent: #3068ff;
+    --color-accent-hover: #2557e0;
+    --color-fw-border: #d8dee9;
+    --color-side-bg: #f3f6fa;
+    --shadow-app: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+/* =========================================================
+   CSS Variables (non-Tailwind tokens)
+   ========================================================= */
+
+:root {
+    --watermark-opacity: 0.06;
+}
+
+/* =========================================================
+   Base overrides
+   ========================================================= */
+
+body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    color: #0f172a;
+}
+
+/* =========================================================
+   Spinner
+   ========================================================= */
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.spinner {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid #e5e9f2;
+    border-top-color: #3068ff;
+    animation: spin 0.8s linear infinite;
+}
+
+/* =========================================================
+   Slide-in panel animation
+   ========================================================= */
+
+@keyframes slide-in-right {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
+}
+
+.animate-slide-in {
+    animation: slide-in-right 0.25s ease-out;
+}
+
+/* ── Form field utility classes ───────────────────────────── */
+
+.field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-ink-2);
+    margin-bottom: 4px;
+}
+
+.field-input {
+    width: 100%;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-fw-border);
+    background: white;
+    font-size: 14px;
+    color: var(--color-ink);
+    outline: none;
+    transition: box-shadow 0.15s;
+}
+
+.field-input:focus {
+    box-shadow: 0 0 0 3px rgba(48, 104, 255, 0.15);
+    border-color: var(--color-accent);
+}
+
+textarea.field-input {
+    height: auto;
+    padding: 8px 12px;
+}
+
+select.field-input {
+    cursor: pointer;
+}
